@@ -15,13 +15,24 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Dependencies & Setup iOS
+      - name: Ensure Web Dir & Config
         run: |
-          npm install
-          npx cap init "GlassAudio" "com.glassaudio.app" --web-dir www || true
-          npx cap add ios || true
+          mkdir -p www
+          if [ ! -f "www/index.html" ]; then
+            python3 -c "import server; open('www/index.html', 'w', encoding='utf-8').write(server.HTML_CONTENT)" 2>/dev/null || echo "<h1>GlassAudio</h1>" > www/index.html
+          fi
+
+      - name: Install Dependencies
+        run: |
+          npm init -y
+          npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/ios@latest
+
+      - name: Setup Capacitor iOS
+        run: |
+          npx cap init "GlassAudio" "com.glassaudio.app" --web-dir www
+          rm -rf ios
+          npx cap add ios
           npx cap sync ios
-          cd ios/App && pod install
 
       - name: Build Xcode Project
         run: |
@@ -48,3 +59,4 @@ jobs:
         with:
           name: GlassAudio-IPA
           path: ios/App/GlassAudio.ipa
+          

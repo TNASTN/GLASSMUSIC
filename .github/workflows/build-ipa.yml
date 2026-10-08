@@ -18,8 +18,10 @@ jobs:
       - name: Install Dependencies & Setup iOS
         run: |
           npm install
+          npx cap init "GlassAudio" "com.glassaudio.app" --web-dir www || true
           npx cap add ios || true
           npx cap sync ios
+          cd ios/App && pod install
 
       - name: Build Xcode Project
         run: |
